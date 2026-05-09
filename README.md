@@ -1,4 +1,4 @@
-<img width="1680" height="744" alt="image" src="https://github.com/user-attachments/assets/600c5ac0-42aa-406a-abbc-fed3aa2e6d70" />
+![Banner](./media/banner.webp)
 
 # Dream Brush
 
@@ -13,11 +13,13 @@ Dream Brush (2026) is an interactive AI painting installation where visitors wri
 
 ## Art style
 
-<img width="360" height="640" alt="image" src="https://github.com/user-attachments/assets/eca63420-3d48-4da8-819c-ccf36f929722" />
+![Art style](./media/art.webp)
 
 The generated paintings blend Chinese ink-wash landscapes with playful, dreamlike motifs, turning written characters into layered visual worlds. Mountains, pavilions, mist, birds, mushrooms, butterflies, rainbows, planets, ninjas, flowers, and figures accumulate across the canvas, preserving the compositional logic of calligraphy while allowing unexpected images to emerge through AI generation. Each artwork is a temporal compression of the human-AI co-creation process.
 
 ## System implementation
+
+![System](./media/system.webp)
 
 Dream Brush is built as a rear-projected tangible interface: an acrylic semi-transparent screen is mounted on an adjustable aluminum easel, with an infrared multi-touch frame detecting the water-brush strokes on the canvas surface. A projector displays the live fading trace and generated painting from behind the screen, while the computer pipeline recognizes each handwritten Chinese character, uses its position and scale to guide localized image generation, and triggers corresponding sound.
 
