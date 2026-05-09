@@ -1,6 +1,6 @@
-![Banner](./media/banner.webp)
-
 # Dream Brush
+
+![Banner](./media/banner.webp)
 
 Generate Chinese tradition painting from location-aware calligraph input
 
