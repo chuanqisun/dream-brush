@@ -15,3 +15,18 @@ The generated paintings blend Chinese ink-wash landscapes with playful, dreamlik
 ## System implementation
 
 Dream Brush is built as a rear-projected tangible interface: an acrylic semi-transparent screen is mounted on an adjustable aluminum easel, with an infrared multi-touch frame detecting the water-brush strokes on the canvas surface. A projector displays the live fading trace and generated painting from behind the screen, while the computer pipeline recognizes each handwritten Chinese character, uses its position and scale to guide localized image generation, and triggers corresponding sound.
+
+- AI system designer: [Sun Chuanqi][1]
+- Hardware designer: [Yuhan Wang][2]
+- Project contributor: [Quincy Kuang][3]
+- Research advisor: [Hiroshi Ishii][4]
+- Text/Image Generative AI: gemini-2.5-flash-image
+- Sound effects: ElevenLabs
+- Background music: Suno
+- Source code: [GitHub][5]
+
+[1]: https://www.linkedin.com/in/chuanqi-sun/
+[2]: https://www.linkedin.com/in/yuhan-wang-095874264/
+[3]: https://www.quincykuang.com/
+[4]: https://tangible.media.mit.edu/person/hiroshi-ishii/
+[5]: https://github.com/chuanqisun/dream-brush
