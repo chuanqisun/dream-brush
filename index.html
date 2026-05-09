@@ -1,37 +1,208 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>temp</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖌️</text></svg>" />
+    <title>Dream Brush</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      * {
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: black;
+        overflow: hidden;
+        padding: 20px;
+
+        &:has(.canvas-stack.debug) {
+          background-color: white;
+        }
+
+        &.flip-x {
+          transform: scaleX(-1);
+        }
+      }
+
+      .canvas-stack {
+        position: relative;
+
+        canvas {
+          height: calc(100vh - 40px);
+          width: auto;
+          border: 4px double black;
+          touch-action: none;
+        }
+
+        #GenerativeCanvas {
+          background-color: rgb(245, 237, 220);
+        }
+
+        canvas:not(#DrawCanvas) {
+          pointer-events: none;
+        }
+
+        .overlay-canvas {
+          position: relative;
+          z-index: 3;
+        }
+
+        &:not(.debug) {
+          display: grid;
+          place-content: center;
+
+          canvas {
+            grid-column: 1 / -1;
+            grid-row: 1 / -1;
+          }
+
+          #debug,
+          .overlay-canvas {
+            display: none;
+          }
+        }
+
+        &.calibrating {
+          .overlay-canvas {
+            display: block;
+          }
+        }
+
+        &.input-debug {
+          .overlay-canvas {
+            display: block;
+          }
+        }
+
+        &:not(.debug).calibrating {
+          .overlay-canvas {
+            grid-column: 1 / -1;
+            grid-row: 1 / -1;
+          }
+        }
+
+        &:not(.debug).input-debug {
+          .overlay-canvas {
+            grid-column: 1 / -1;
+            grid-row: 1 / -1;
+          }
+        }
+
+        &.debug {
+          canvas {
+            width: 240px;
+            height: auto;
+          }
+
+          display: grid;
+          grid-template:
+            "draw outline render" 1fr
+            / auto auto auto;
+          gap: 16px;
+          justify-content: center;
+
+          #debug {
+            grid-area: outline;
+          }
+
+          #DrawCanvas {
+            grid-area: draw;
+          }
+
+          #GenerativeCanvas {
+            grid-area: render;
+          }
+
+          .character-canvas,
+          .overlay-canvas {
+            grid-area: outline;
+          }
+        }
+
+        &.debug.calibrating {
+          .overlay-canvas {
+            grid-area: draw;
+          }
+        }
+
+        &.debug.input-debug {
+          .overlay-canvas {
+            grid-area: draw;
+          }
+        }
+      }
+
+      .app-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+
+        body.flip-x & {
+          transform: scaleX(-1);
+        }
+
+        &:not(:hover, :focus) {
+          opacity: 0;
+        }
+      }
+    </style>
   </head>
   <body>
-    <ul>
-      <li>
-        <a href="./100-sqaure.html">Square JS</a>
-      </li>
-      <li>
-        <a href="./101-sqaure-gpu.html">Square WebGL</a>
-      </li>
-      <li>
-        <a href="./102-drawing.html">Drawing</a>
-      </li>
-      <li>
-        <a href="./103-guided-diffusion.html">Guided Diffusion</a>
-      </li>
-      <li>
-        <a href="./104-interaction.html">Interaction</a>
-      </li>
-      <li>
-        <a href="./105-layers.html">Layers</a>
-      </li>
-      <li>
-        <a href="./106-ai.html">AI</a>
-      </li>
-      <li>
-        <a href="./107-pipeline.html">Pipeline</a>
-      </li>
-    </ul>
+    <dialog id="export-dialog" class="export-dialog">
+      <div class="export-dialog-body">
+        <h2>Capture Directory</h2>
+        <p>Choose a directory for automatic rendered-canvas exports before the demo starts.</p>
+        <div class="export-dialog-actions">
+          <button type="button" id="skip-export-directory">Skip</button>
+          <button type="button" id="choose-export-directory">Choose Directory</button>
+        </div>
+      </div>
+    </dialog>
+
+    <header class="app-header">
+      <button commandfor="canvas-stack" command="--toggle-debug">Debug</button>
+      <button commandfor="connection-dialog" command="show-modal">Setup</button>
+      <button id="music-toggle">Music: Off</button>
+      <button id="sfx-toggle">SFX: Off</button>
+      <button id="clear-canvas-button">Clear Canvas</button>
+      <button id="export-directory-button">Export Dir</button>
+      <button id="layout-toggle">Layout: Left-Right</button>
+      <button id="calibrate-toggle">Calibrate</button>
+      <button id="flip-toggle">Flip: Off</button>
+      <span id="export-status" class="header-status">Choose an export directory</span>
+    </header>
+
+    <div id="canvas-stack" class="canvas-stack">
+      <canvas id="OverlayCanvas" width="720" height="1280" class="overlay-canvas"></canvas>
+      <canvas id="debug" width="720" height="1280"></canvas>
+      <canvas id="GenerativeCanvas" width="720" height="1280"></canvas>
+      <canvas id="DrawCanvas" width="720" height="1280"></canvas>
+    </div>
+
+    <dialog class="connection-form" id="connection-dialog">
+      <div class="connections-dialog-body">
+        <form method="dialog" id="ai-connection-form">
+          <h2>Connections</h2>
+          <div style="margin-bottom: 10px">
+            <label for="api-key-input">Google AI Studio API Key:</label>
+            <input type="password" id="api-key-input" placeholder="Enter your Google AI Studio API key" style="width: 100%" />
+          </div>
+          <div style="margin-bottom: 20px">
+            <label for="elevenlabs-api-key-input">ElevenLabs API Key:</label>
+            <input type="password" id="elevenlabs-api-key-input" placeholder="Enter your ElevenLabs API key" style="width: 100%" />
+          </div>
+          <button type="button" id="reset-btn">Reset</button>
+          <button type="submit">Close</button>
+          <div id="connection-status"></div>
+        </form>
+      </div>
+    </dialog>
+    <script src="src/pipeline.ts" type="module"></script>
   </body>
 </html>
