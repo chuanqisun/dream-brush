@@ -4,6 +4,9 @@
 
 Generate Chinese tradition painting from location-aware calligraph input
 
+- [Demo video 1](https://www.youtube.com/watch?v=FUGcTMSbbyM)
+- [Demo video 2](https://www.youtube.com/watch?v=PR9V12ORtWY)
+
 ## Intro
 
 Dream Brush (2026) is an interactive AI painting installation where visitors write Chinese characters with a water brush on a physical canvas. Instead of typing prompts from a distance, participants create through embodied calligraphic gestures: what they write, where they place it, how large it is, and how it is oriented all become part of the evolving composition. The project draws on the historical continuity between Chinese writing and painting, treating each character as both a meaningful word and a pictorial mark. As the brushstroke fades like drying water, the system responds with new imagery and sound, creating a rhythm of inscription, waiting, and reveal. Designed for public interaction, Dream Brush invites individuals and groups to improvise together, negotiate what to write next, and experience generative AI as a shared encounter between cultural practice, physical gesture, and machine interpretation.
