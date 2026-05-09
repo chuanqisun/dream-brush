@@ -13,6 +13,8 @@ Dream Brush (2026) is an interactive AI painting installation where visitors wri
 
 ## Art style
 
+<img width="360" height="640" alt="image" src="https://github.com/user-attachments/assets/eca63420-3d48-4da8-819c-ccf36f929722" />
+
 The generated paintings blend Chinese ink-wash landscapes with playful, dreamlike motifs, turning written characters into layered visual worlds. Mountains, pavilions, mist, birds, mushrooms, butterflies, rainbows, planets, ninjas, flowers, and figures accumulate across the canvas, preserving the compositional logic of calligraphy while allowing unexpected images to emerge through AI generation. Each artwork is a temporal compression of the human-AI co-creation process.
 
 ## System implementation
