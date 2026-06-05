@@ -38,6 +38,9 @@
       .flipped video {
         transform: scaleX(-1);
       }
+      .flipped #custom-subtitles {
+        transform: translateX(-50%) scaleX(-1);
+      }
 
       .app-header {
         position: fixed;
@@ -49,6 +52,33 @@
           opacity: 0;
         }
       }
+
+      #custom-subtitles {
+        position: absolute;
+        bottom: 64px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        background-color: rgba(0, 0, 0, 0.75);
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        font-size: 1.25rem;
+        text-align: center;
+        max-width: 45vh; /* for horizontal display against 9:16 video */
+        white-space: pre-line;
+        pointer-events: none;
+        z-index: 1000;
+        line-height: 1.4;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
     </style>
   </head>
   <body>
@@ -58,7 +88,6 @@
 
     <video id="videoPlayer" controls playsinline data-index="0">
       <source src="./src/videos/full-walkthrough.webm" type="video/webm" />
-      <track label="English" kind="subtitles" srclang="en" src="./src/videos/full-walkthrough.vtt" default />
       Your browser does not support the video tag.
     </video>
 
