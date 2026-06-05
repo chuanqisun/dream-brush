@@ -24,64 +24,40 @@
       }
 
       video {
-        height: 100%;
-        width: 100%;
+        max-height: 100%;
         min-height: 0;
         min-width: 0;
         object-fit: contain;
+        aspect-ratio: 9 / 16;
+      }
+
+      .flipped video {
+        transform: scaleX(-1);
+      }
+
+      .app-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+
+        &:not(:hover, :focus) {
+          opacity: 0;
+        }
       }
     </style>
   </head>
   <body>
+    <header class="app-header">
+      <button id="flip-toggle">Flip: Off</button>
+    </header>
+
     <video id="videoPlayer" controls playsinline>
       <source src="./src/videos/full-walkthrough.webm" type="video/webm" />
       <track label="English" kind="subtitles" srclang="en" src="./src/videos/full-walkthrough.vtt" default />
       Your browser does not support the video tag.
     </video>
 
-    <script>
-      // 2. Define your list of videos
-      const playlist = ["./src/videos/full-walkthrough.webm", "./src/videos/hype.webm"];
-      const subtitles = ["./src/videos/full-walkthrough.vtt", "./src/videos/hype.vtt"];
-
-      let currentVideoIndex = 0;
-      const player = document.getElementById("videoPlayer");
-
-      // 3. Listen for the "ended" event
-      player.addEventListener("ended", function () {
-        // Move to the next video index
-        currentVideoIndex++;
-
-        // If we reach the end of the playlist, loop back to the first video
-        if (currentVideoIndex >= playlist.length) {
-          currentVideoIndex = 0;
-        }
-
-        // Dynamically load the correct subtitle track
-        const oldTrack = player.querySelector("track");
-        if (oldTrack) {
-          oldTrack.remove();
-        }
-
-        const newTrack = document.createElement("track");
-        newTrack.label = "English";
-        newTrack.kind = "subtitles";
-        newTrack.srclang = "en";
-        newTrack.src = subtitles[currentVideoIndex];
-        newTrack.default = true;
-        player.appendChild(newTrack);
-
-        // Update the source file and trigger playback
-        player.src = playlist[currentVideoIndex];
-        player.load();
-
-        // Ensure the subtitles are displayed automatically
-        newTrack.track.mode = "showing";
-
-        player.play().catch((error) => {
-          console.log("Autoplay was blocked by the browser:", error);
-        });
-      });
-    </script>
+    <script type="module" src="./src/player.ts"></script>
   </body>
 </html>
