@@ -35,12 +35,14 @@
   <body>
     <video id="videoPlayer" controls playsinline>
       <source src="./src/videos/full-walkthrough.webm" type="video/webm" />
+      <track label="English" kind="subtitles" srclang="en" src="./src/videos/full-walkthrough.vtt" default />
       Your browser does not support the video tag.
     </video>
 
     <script>
       // 2. Define your list of videos
       const playlist = ["./src/videos/full-walkthrough.webm", "./src/videos/hype.webm"];
+      const subtitles = ["./src/videos/full-walkthrough.vtt", "./src/videos/hype.vtt"];
 
       let currentVideoIndex = 0;
       const player = document.getElementById("videoPlayer");
@@ -55,9 +57,27 @@
           currentVideoIndex = 0;
         }
 
+        // Dynamically load the correct subtitle track
+        const oldTrack = player.querySelector("track");
+        if (oldTrack) {
+          oldTrack.remove();
+        }
+
+        const newTrack = document.createElement("track");
+        newTrack.label = "English";
+        newTrack.kind = "subtitles";
+        newTrack.srclang = "en";
+        newTrack.src = subtitles[currentVideoIndex];
+        newTrack.default = true;
+        player.appendChild(newTrack);
+
         // Update the source file and trigger playback
         player.src = playlist[currentVideoIndex];
         player.load();
+
+        // Ensure the subtitles are displayed automatically
+        newTrack.track.mode = "showing";
+
         player.play().catch((error) => {
           console.log("Autoplay was blocked by the browser:", error);
         });
