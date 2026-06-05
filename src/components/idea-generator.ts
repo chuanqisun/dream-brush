@@ -10,7 +10,7 @@ const conceptSchema = z.object({
       z.object({
         character: z.string().describe("A single Chinese character"),
         meaning: z.string().describe("Short English definition, one-word"),
-      })
+      }),
     )
     .min(5)
     .max(7),
@@ -22,7 +22,7 @@ const conceptSchema = z.object({
  * Each concept is a single Chinese character
  */
 export function startIdeaGeneration(
-  recognizedConcepts: Observable<{ character: string; meaning: string }>
+  recognizedConcepts: Observable<{ character: string; meaning: string }>,
 ): Observable<{ character: string; meaning: string }> {
   const apiKey = localStorage.getItem("google_ai_api_key") || "";
   const ai = new GoogleGenAI({ apiKey });
@@ -62,7 +62,7 @@ Represent each object with a *single* Chinese character and Single word/phrase E
         (async () => {
           try {
             const stream = await ai.models.generateContentStream({
-              model: "gemini-3-flash-preview",
+              model: "gemini-3.5-flash",
               contents: [{ role: "user", parts: [{ text: prompt }] }],
               config: {
                 thinkingConfig: {
@@ -90,6 +90,6 @@ Represent each object with a *single* Chinese character and Single word/phrase E
           alive = false;
         };
       });
-    })
+    }),
   );
 }

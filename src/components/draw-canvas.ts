@@ -28,6 +28,7 @@ export class DrawingCanvas extends EventTarget {
   private readonly MIN_W = 1.0;
   private readonly SPEED_LIMIT = 35;
   private readonly LERP_SPEED = 0.4;
+  private readonly MAX_STROKE_INTERVAL = 1200;
 
   private inputAdapter: DrawingInputAdapter | null = null;
   private interactionLocked = false;
@@ -104,7 +105,7 @@ export class DrawingCanvas extends EventTarget {
 
   private resetTimer(): void {
     this.clearDrawingTimer();
-    this.drawingTimer = setTimeout(() => this.handleFinishDrawing(), 1000);
+    this.drawingTimer = setTimeout(() => this.handleFinishDrawing(), this.MAX_STROKE_INTERVAL);
   }
 
   private attachCanvasListeners(): void {

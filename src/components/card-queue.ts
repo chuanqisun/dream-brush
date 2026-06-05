@@ -69,7 +69,6 @@ export class CardQueue {
 
     const fullHeight = card.offsetHeight;
     const fullWidth = card.offsetWidth;
-    const gap = 12;
     const moveTranslate = this.getEntryTranslate();
     const horizontal = this.isHorizontal();
 
@@ -80,28 +79,18 @@ export class CardQueue {
           ...(horizontal ? { width: "0px" } : { height: "0px" }),
           opacity: 0,
           transform: `${moveTranslate} scale(0.9)`,
-          ...(horizontal ? { marginRight: "0px" } : { marginBottom: "0px" }),
-          paddingTop: "0px",
-          paddingBottom: "0px",
-          ...(horizontal ? { paddingLeft: "0px", paddingRight: "0px" } : {}),
-          borderWidth: "0px",
         },
         {
           ...(horizontal ? { width: `${fullWidth}px` } : { height: `${fullHeight}px` }),
           opacity: 1,
           transform: "translate(0, 0) scale(1)",
-          ...(horizontal ? { marginRight: `${gap}px` } : { marginBottom: `${gap}px` }),
-          paddingTop: "12px",
-          paddingBottom: "12px",
-          ...(horizontal ? { paddingLeft: "12px", paddingRight: "12px" } : {}),
-          borderWidth: "1px",
         },
       ],
       {
         duration: 500,
         easing: "cubic-bezier(0.23, 1, 0.32, 1)",
         fill: "forwards",
-      }
+      },
     );
 
     // Handle removal of oldest card if over limit
@@ -131,7 +120,7 @@ export class CardQueue {
               duration: 400,
               easing: "ease-in",
               fill: "forwards",
-            }
+            },
           )
           .finished.then(() => oldestCard.remove());
       }

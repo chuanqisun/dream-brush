@@ -46,8 +46,8 @@ export async function main() {
   const skipExportDirectoryButton = document.getElementById("skip-export-directory") as HTMLButtonElement;
   const exportStatus = document.getElementById("export-status") as HTMLSpanElement;
   const clearCanvasButton = document.getElementById("clear-canvas-button") as HTMLButtonElement;
-  const ideaHints = new CardQueue("right", 7);
-  const history = new CardQueue("left", 7);
+  const ideaHints = new CardQueue("right", 5);
+  const history = new CardQueue("left", 5);
   const menu = new PipelineMenuController({
     canvasStack,
     historyQueue: history,
@@ -180,7 +180,7 @@ export async function main() {
         });
         const fast$ = from(identifyCharacterFast(connection, dataUrl)).pipe(
           tap((result) => console.log("Fast OCR", result)),
-          map((meaning) => ({ identifiedMeaning: meaning, box: boundingBox, charCanvas }))
+          map((meaning) => ({ identifiedMeaning: meaning, box: boundingBox, charCanvas })),
         );
         const slow$ = from(identifyCharacter(connection, dataUrl)).pipe(
           tap((result) => {
@@ -188,7 +188,7 @@ export async function main() {
             recognizedConcepts$.next(result);
             history.add(result);
           }),
-          ignoreElements()
+          ignoreElements(),
         );
         return merge(fast$, slow$);
       }),
@@ -198,7 +198,7 @@ export async function main() {
         console.log("Overlay Image:", { overlayImage, result });
 
         const visual$ = from(
-          overlayImage ? editPainting(connection, overlayImage, result.identifiedMeaning) : generatePainting(connection, result.identifiedMeaning)
+          overlayImage ? editPainting(connection, overlayImage, result.identifiedMeaning) : generatePainting(connection, result.identifiedMeaning),
         ).pipe(
           concatMap((imageUrls) => from(imageUrls)),
           take(1),
@@ -212,7 +212,7 @@ export async function main() {
           }),
           finalize(() => {
             generativeCanvas.clearOverlay();
-          })
+          }),
         );
 
         const sound$ = soundscape.sfxEnabled
@@ -225,7 +225,7 @@ export async function main() {
                 console.warn("Sound generation failed, proceeding with visual only:", err);
                 return of(null);
               }),
-              defaultIfEmpty(null)
+              defaultIfEmpty(null),
             )
           : of(null);
 
@@ -234,14 +234,14 @@ export async function main() {
           catchError((err) => {
             console.error("Audio playback error:", err);
             return EMPTY;
-          })
+          }),
         );
-      })
+      }),
     )
     .pipe(
       finalize(() => {
         soundscape.stopAll();
-      })
+      }),
     );
 
   program$.subscribe();

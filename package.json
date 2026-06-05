@@ -10,16 +10,16 @@
   },
   "devDependencies": {
     "typescript": "~6.0.3",
-    "vite": "^8.0.10"
+    "vite": "^8.0.16"
   },
   "dependencies": {
-    "@elevenlabs/elevenlabs-js": "^2.45.0",
-    "@google/genai": "^1.50.1",
+    "@elevenlabs/elevenlabs-js": "^2.51.0",
+    "@google/genai": "^2.8.0",
     "@streamparser/json": "^0.0.22",
-    "@types/node": "^25.6.0",
-    "lit-html": "^3.3.2",
+    "@types/node": "^25.9.1",
+    "lit-html": "^3.3.3",
     "rxjs": "^7.8.2",
-    "zod": "^4.3.6",
+    "zod": "^4.4.3",
     "zod-to-json-schema": "^3.25.2"
   }
 }

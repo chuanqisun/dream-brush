@@ -25,7 +25,6 @@ export async function identifyCharacter(aiConnection: AIConnection, imageData: s
       thinkingLevel: ThinkingLevel.MINIMAL,
     },
   };
-  const model = "gemini-3-flash-preview";
 
   // Parse the image data (assuming it's a data URL like data:image/jpeg;base64,...)
   let data: string;
@@ -65,7 +64,7 @@ Respond in this JSON format:
 
   console.time("identifyCharacter");
   const response = await ai.models.generateContent({
-    model,
+    model: "gemini-3.5-flash",
     config,
     contents,
   });
