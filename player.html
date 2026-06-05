@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖌️</text></svg>" />
+    <title>Dream Brush</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      * {
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: black;
+        height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+      }
+
+      video {
+        height: 100%;
+        width: 100%;
+        min-height: 0;
+        min-width: 0;
+        object-fit: contain;
+      }
+    </style>
+  </head>
+  <body>
+    <video id="videoPlayer" controls playsinline>
+      <source src="./src/videos/full-walkthrough.webm" type="video/webm" />
+      Your browser does not support the video tag.
+    </video>
+
+    <script>
+      // 2. Define your list of videos
+      const playlist = ["./src/videos/full-walkthrough.webm", "./src/videos/hype.webm"];
+
+      let currentVideoIndex = 0;
+      const player = document.getElementById("videoPlayer");
+
+      // 3. Listen for the "ended" event
+      player.addEventListener("ended", function () {
+        // Move to the next video index
+        currentVideoIndex++;
+
+        // If we reach the end of the playlist, loop back to the first video
+        if (currentVideoIndex >= playlist.length) {
+          currentVideoIndex = 0;
+        }
+
+        // Update the source file and trigger playback
+        player.src = playlist[currentVideoIndex];
+        player.load();
+        player.play().catch((error) => {
+          console.log("Autoplay was blocked by the browser:", error);
+        });
+      });
+    </script>
+  </body>
+</html>
