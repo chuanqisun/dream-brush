@@ -53,7 +53,7 @@
 }
 
 .card-queue-container.top {
-  top: 20px;
+  top: 32px;
   left: 50%;
   transform: translateX(-50%);
   grid-auto-flow: column;
@@ -61,7 +61,7 @@
 }
 
 .card-queue-container.bottom {
-  bottom: 20px;
+  bottom: 36px;
   left: 50%;
   transform: translateX(-50%);
   grid-auto-flow: column;
