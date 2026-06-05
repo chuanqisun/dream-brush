@@ -29,6 +29,10 @@
         min-width: 0;
         object-fit: contain;
         aspect-ratio: 9 / 16;
+
+        &[data-index="0"] {
+          aspect-ratio: 16 / 9;
+        }
       }
 
       .flipped video {
@@ -52,7 +56,7 @@
       <button id="flip-toggle">Flip: Off</button>
     </header>
 
-    <video id="videoPlayer" controls playsinline>
+    <video id="videoPlayer" controls playsinline data-index="0">
       <source src="./src/videos/full-walkthrough.webm" type="video/webm" />
       <track label="English" kind="subtitles" srclang="en" src="./src/videos/full-walkthrough.vtt" default />
       Your browser does not support the video tag.

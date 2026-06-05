@@ -20,6 +20,8 @@ player.addEventListener("ended", function () {
     currentVideoIndex = 0;
   }
 
+  player.setAttribute("data-index", currentVideoIndex.toString());
+
   // Dynamically load the correct subtitle track
   const oldTrack = player.querySelector("track");
   if (oldTrack) {
