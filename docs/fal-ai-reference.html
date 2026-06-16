@@ -1,0 +1,1268 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fal.ai Image Lab</title>
+    <style>
+      :root {
+        --color-text-primary: #333;
+        --color-text-secondary: #555;
+        --color-border-medium: #ccc;
+        --color-white: white;
+        --color-action-button-hover: #eeeeee;
+        --color-drag-handle: #999;
+        --color-drag-handle-hover: #eeeeee;
+        --color-insert-indicator: #28a745;
+      }
+
+      * {
+        font-size: inherit;
+        box-sizing: border-box;
+      }
+
+      html {
+        scrollbar-gutter: stable;
+      }
+
+      body {
+        font-family: sans-serif;
+        max-width: 40rem;
+        margin: 0 auto;
+        padding: 16px;
+        color: var(--color-text-primary);
+        line-height: 1.4;
+      }
+
+      .input-section,
+      .output-section {
+        margin-bottom: 24px;
+      }
+
+      textarea,
+      input[type="text"],
+      input[type="password"],
+      input[type="number"],
+      select {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+        margin-top: 4px;
+        margin-bottom: 8px;
+      }
+
+      textarea {
+        field-sizing: content;
+        resize: none;
+      }
+
+      button {
+        cursor: pointer;
+        background-color: transparent;
+        border: 1px solid var(--color-border-medium);
+        padding: 8px 16px;
+        border-radius: 4px;
+        color: var(--color-text-secondary);
+      }
+
+      button:hover,
+      button:focus {
+        color: var(--color-text-primary);
+        background-color: var(--color-action-button-hover);
+      }
+
+      label {
+        color: var(--color-text-secondary);
+        font-size: 14px;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+        text-align: left;
+        align-items: center;
+      }
+
+      .action-buttons select,
+      .action-buttons input[type="number"] {
+        width: auto;
+        margin: 0;
+        padding: 8px 12px;
+        border: 1px solid var(--color-border-medium);
+        border-radius: 4px;
+        background-color: transparent;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+      }
+
+      input,
+      textarea,
+      select {
+        font-family: monospace;
+        margin: 0;
+        border-radius: 4px;
+        border: 1px solid var(--color-border-medium);
+      }
+
+      #messages-container {
+        margin-top: 0;
+      }
+
+      .message-item {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: start;
+        margin-bottom: 8px;
+        border: 1px solid var(--color-border-medium);
+        border-radius: 4px;
+        background-color: var(--color-white);
+        position: relative;
+      }
+
+      .message-item.has-image {
+        grid-template-columns: auto auto 1fr auto;
+      }
+
+      .message-item.dragging {
+        opacity: 0.5;
+      }
+
+      .message-item.drag-over-top::before,
+      .message-item.drag-over-bottom::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: var(--color-insert-indicator);
+        z-index: 10;
+      }
+
+      .message-item.drag-over-top::before {
+        top: -2px;
+      }
+
+      .message-item.drag-over-bottom::after {
+        bottom: -2px;
+      }
+
+      .drag-handle {
+        align-self: stretch;
+        grid-column: 1 / 2;
+        width: 24px;
+        background-color: transparent;
+        cursor: grab;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-drag-handle);
+        font-size: 24px;
+        line-height: 1;
+        user-select: none;
+        padding: 8px 0;
+        border-right: 1px solid var(--color-border-medium);
+      }
+
+      .drag-handle:active {
+        cursor: grabbing;
+      }
+
+      .drag-handle:hover {
+        color: var(--color-text-primary);
+        background-color: var(--color-drag-handle-hover);
+      }
+
+      .message-thumbnail {
+        grid-column: 2 / 3;
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border: 1px solid var(--color-border-medium);
+        border-radius: 4px;
+        margin: 8px;
+        display: none;
+      }
+
+      .message-item.has-image .message-thumbnail {
+        display: block;
+      }
+
+      .message-textarea {
+        grid-column: 2 / 3;
+        min-width: 100%;
+        margin: 0;
+        padding: 8px;
+        border: none;
+        height: 100%;
+        max-height: 40vh;
+      }
+
+      .message-item.has-image .message-textarea {
+        grid-column: 3 / 4;
+      }
+
+      .message-buttons {
+        border-left: 1px solid var(--color-border-medium);
+        grid-column: 3 / 4;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        align-self: stretch;
+      }
+
+      .message-item.has-image .message-buttons {
+        grid-column: 4 / 5;
+      }
+
+      .message-button {
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: 20px;
+        padding: 8px;
+        line-height: 1;
+      }
+
+      .message-button:hover {
+        background-color: var(--color-action-button-hover);
+      }
+
+      #output-container {
+        margin-top: 8px;
+      }
+
+      .output-item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: start;
+        margin-bottom: 16px;
+        border: 1px solid var(--color-border-medium);
+        border-radius: 4px;
+        background-color: var(--color-white);
+      }
+
+      .output-item-content {
+        padding: 8px;
+        min-width: 0;
+      }
+
+      .output-item-image {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid var(--color-border-medium);
+        border-radius: 4px;
+        margin-bottom: 8px;
+      }
+
+      .output-status {
+        color: var(--color-text-secondary);
+        font-size: 14px;
+        margin-bottom: 8px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .output-prompt {
+        color: var(--color-text-primary);
+        font-size: 14px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        margin-bottom: 8px;
+      }
+
+      .output-result-text {
+        color: var(--color-text-secondary);
+        font-size: 14px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        margin-bottom: 8px;
+      }
+
+      .output-meta {
+        color: var(--color-text-secondary);
+        font-size: 12px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        margin-top: 8px;
+        font-family: monospace;
+      }
+
+      .output-item-buttons {
+        border-left: 1px solid var(--color-border-medium);
+        grid-column: 2 / 3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        align-self: stretch;
+      }
+
+      details {
+        margin-top: 8px;
+        color: var(--color-text-secondary);
+        font-size: 14px;
+      }
+
+      pre {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font-size: 12px;
+      }
+
+      .hidden-file-input {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>Setup</h1>
+    </header>
+
+    <div class="input-section">
+      <label for="api-key">fal.ai API Key</label>
+      <input type="password" id="api-key" title="api-key" placeholder="Enter your fal.ai API Key here" />
+    </div>
+
+    <div class="input-section">
+      <h2>Input</h2>
+
+      <div id="messages-container"></div>
+
+      <div class="action-buttons">
+        <button id="add-item-button" title="add-item-button">Add Item</button>
+        <button id="delete-all-button" title="delete-all-button">Delete All</button>
+      </div>
+    </div>
+
+    <div class="output-section">
+      <h2>Output</h2>
+      <div class="action-buttons">
+        <select id="model-select" title="model-select"></select>
+        <span id="model-options"></span>
+        <button id="generate-button" title="generate-button">Generate image</button>
+        <button id="delete-all-outputs-button" title="delete-all-outputs-button">Delete all</button>
+      </div>
+      <div id="output-container"></div>
+    </div>
+
+    <script type="module">
+      import { get, set, createStore } from "https://esm.sh/idb-keyval";
+
+      class SortableManager {
+        constructor({ itemSelector, handleSelector, onReorder, onReorderComplete }) {
+          this.itemSelector = itemSelector;
+          this.handleSelector = handleSelector;
+          this.onReorder = onReorder;
+          this.onReorderComplete = onReorderComplete;
+          this.draggedId = null;
+          this.lastMouseDownTarget = null;
+          this.pendingReorder = false;
+          this._init();
+        }
+
+        _init() {
+          window.addEventListener(
+            "mousedown",
+            (e) => {
+              this.lastMouseDownTarget = e.target;
+              const item = e.target.closest(this.itemSelector);
+              const handle = e.target.closest(this.handleSelector);
+              if (item) item.draggable = !!handle;
+            },
+            true,
+          );
+
+          window.addEventListener(
+            "mouseup",
+            () => {
+              document.querySelectorAll(this.itemSelector).forEach((i) => (i.draggable = false));
+            },
+            true,
+          );
+        }
+
+        attach(el, id) {
+          el.ondragstart = (e) => {
+            if (e.target !== el) return;
+            const handle = this.lastMouseDownTarget ? this.lastMouseDownTarget.closest(this.handleSelector) : null;
+            if (!handle) {
+              e.preventDefault();
+              return;
+            }
+
+            this.draggedId = id;
+            this.pendingReorder = false;
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/plain", id);
+            setTimeout(() => el.classList.add("dragging"), 0);
+          };
+
+          el.ondragend = () => {
+            el.classList.remove("dragging");
+            el.draggable = false;
+            document.querySelectorAll(this.itemSelector).forEach((i) => {
+              i.classList.remove("drag-over-top", "drag-over-bottom");
+            });
+
+            if (this.pendingReorder) {
+              this.onReorderComplete();
+              this.pendingReorder = false;
+            }
+            this.draggedId = null;
+          };
+
+          el.ondragover = (e) => {
+            if (!this.draggedId || el.dataset.id === this.draggedId) return;
+            e.preventDefault();
+
+            const rect = el.getBoundingClientRect();
+            const isTop = e.clientY < rect.top + rect.height / 2;
+            el.classList.remove("drag-over-top", "drag-over-bottom");
+            el.classList.add(isTop ? "drag-over-top" : "drag-over-bottom");
+          };
+
+          el.ondragleave = () => el.classList.remove("drag-over-top", "drag-over-bottom");
+
+          el.ondrop = (e) => {
+            if (!this.draggedId || this.draggedId === id) return;
+            e.preventDefault();
+            el.classList.remove("drag-over-top", "drag-over-bottom");
+
+            const rect = el.getBoundingClientRect();
+            const isTop = e.clientY < rect.top + rect.height / 2;
+            this.onReorder(this.draggedId, id, isTop);
+            this.pendingReorder = true;
+          };
+        }
+      }
+
+      class FalRestClient {
+        constructor(apiKey) {
+          this.apiKey = apiKey;
+        }
+
+        async run(endpoint, input) {
+          const response = await fetch(`https://fal.run/${endpoint}`, {
+            method: "POST",
+            headers: {
+              Authorization: `Key ${this.apiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(input),
+          });
+
+          const text = await response.text();
+          let data;
+
+          try {
+            data = text ? JSON.parse(text) : {};
+          } catch {
+            data = { rawText: text };
+          }
+
+          if (!response.ok) {
+            const error = new Error(data?.detail || data?.message || text || `HTTP ${response.status}`);
+            error.raw = data;
+            throw error;
+          }
+
+          return data;
+        }
+      }
+
+      class FalModelProvider {
+        constructor(definition) {
+          Object.assign(this, definition);
+        }
+
+        renderOptionControls(container, state, onChange) {
+          container.innerHTML = "";
+
+          for (const option of this.options || []) {
+            const input = option.type === "select" ? document.createElement("select") : document.createElement("input");
+            input.title = option.key;
+            input.dataset.optionKey = option.key;
+
+            if (option.type === "select") {
+              for (const choice of option.choices) {
+                const opt = document.createElement("option");
+                opt.value = choice.value;
+                opt.textContent = choice.label;
+                input.appendChild(opt);
+              }
+            } else {
+              input.type = option.type || "text";
+              if (option.step != null) input.step = option.step;
+              if (option.min != null) input.min = option.min;
+              if (option.max != null) input.max = option.max;
+            }
+
+            input.value = state[option.key] ?? option.default ?? "";
+            input.addEventListener("change", onChange);
+            input.addEventListener("input", onChange);
+            container.appendChild(input);
+          }
+        }
+
+        readOptions(container) {
+          const result = {};
+
+          for (const option of this.options || []) {
+            const el = container.querySelector(`[data-option-key="${option.key}"]`);
+            if (!el) continue;
+
+            if (option.type === "number") result[option.key] = Number(el.value);
+            else result[option.key] = el.value;
+          }
+
+          return result;
+        }
+
+        buildMessagesInput(messages) {
+          const nonEmpty = messages.filter((m) => m.text.trim() || m.image);
+          const prompt = nonEmpty
+            .map((m) => m.text.trim())
+            .filter(Boolean)
+            .join("\n\n");
+          const imageDataUrls = nonEmpty.filter((m) => m.image).map((m) => m.image.dataUrl);
+          return { prompt, imageDataUrls };
+        }
+
+        async generate({ client, messages, options }) {
+          const { prompt, imageDataUrls } = this.buildMessagesInput(messages);
+          const input = {
+            ...this.buildInput({ prompt, imageDataUrls, options }),
+            sync_mode: true,
+          };
+
+          const data = await client.run(this.endpoint, input);
+          return this.normalizeResult(data, input);
+        }
+
+        normalizeResult(data, input) {
+          const images = [];
+
+          if (Array.isArray(data?.images)) {
+            for (const image of data.images) images.push(image.url || image);
+          }
+
+          if (data?.image?.url) images.push(data.image.url);
+          if (typeof data?.image === "string") images.push(data.image);
+          if (data?.url) images.push(data.url);
+
+          return {
+            images: images.filter(Boolean),
+            text: data?.description || data?.prompt || data?.message || "",
+            raw: data,
+            input,
+          };
+        }
+      }
+
+      const aspectChoices = ["1:1", "3:2", "4:3", "16:9", "9:16"].map((v) => ({ value: v, label: v }));
+
+      const fluxSizeChoices = [
+        { value: "square", label: "Square" },
+        { value: "square_hd", label: "Square HD" },
+        { value: "portrait_4_3", label: "Portrait 4:3" },
+        { value: "portrait_16_9", label: "Portrait 16:9" },
+        { value: "landscape_4_3", label: "Landscape 4:3" },
+        { value: "landscape_16_9", label: "Landscape 16:9" },
+      ];
+
+      const gptImage2SizeChoices = [{ value: "auto", label: "auto" }, ...fluxSizeChoices];
+
+      const MODELS = [
+        new FalModelProvider({
+          id: "fal-ai/gpt-image-2",
+          label: "gpt-image-2",
+          endpoint: "fal-ai/gpt-image-2",
+          capabilities: { imageToImage: false },
+          options: [{ key: "image_size", label: "Image size", type: "select", default: "auto", choices: gptImage2SizeChoices }],
+          buildInput({ prompt, options }) {
+            const validSizes = new Set(gptImage2SizeChoices.map((choice) => choice.value));
+            const imageSize = validSizes.has(options.image_size) ? options.image_size : "auto";
+            return { prompt, image_size: imageSize };
+          },
+        }),
+
+        new FalModelProvider({
+          id: "openai/gpt-image-2/edit",
+          label: "gpt-image-2/edit",
+          endpoint: "openai/gpt-image-2/edit",
+          capabilities: { imageToImage: true },
+          options: [
+            { key: "image_size", label: "Image size", type: "select", default: "auto", choices: gptImage2SizeChoices },
+            {
+              key: "quality",
+              label: "Quality",
+              type: "select",
+              default: "high",
+              choices: [
+                { value: "low", label: "low" },
+                { value: "medium", label: "medium" },
+                { value: "high", label: "high" },
+              ],
+            },
+            { key: "num_images", label: "Number", type: "number", default: 1, min: 1, max: 4 },
+            {
+              key: "output_format",
+              label: "Format",
+              type: "select",
+              default: "png",
+              choices: [
+                { value: "png", label: "png" },
+                { value: "jpeg", label: "jpeg" },
+                { value: "webp", label: "webp" },
+              ],
+            },
+          ],
+          buildInput({ prompt, imageDataUrls, options }) {
+            return {
+              prompt,
+              image_urls: imageDataUrls,
+              image_size: options.image_size || "auto",
+              quality: options.quality || "high",
+              num_images: options.num_images || 1,
+              output_format: options.output_format || "png",
+            };
+          },
+        }),
+
+        new FalModelProvider({
+          id: "fal-ai/nano-banana",
+          label: "nano-banana",
+          endpoint: "fal-ai/nano-banana",
+          capabilities: { imageToImage: false },
+          options: [],
+          buildInput({ prompt }) {
+            return { prompt };
+          },
+        }),
+
+        new FalModelProvider({
+          id: "fal-ai/nano-banana-2",
+          label: "nano-banana-2",
+          endpoint: "fal-ai/nano-banana-2",
+          capabilities: { imageToImage: false },
+          options: [{ key: "aspect_ratio", label: "Aspect ratio", type: "select", default: "16:9", choices: aspectChoices }],
+          buildInput({ prompt, options }) {
+            return { prompt, aspect_ratio: options.aspect_ratio };
+          },
+        }),
+
+        new FalModelProvider({
+          id: "fal-ai/nano-banana-2/edit",
+          label: "nano-banana-2/edit",
+          endpoint: "fal-ai/nano-banana-2/edit",
+          capabilities: { imageToImage: true },
+          options: [],
+          buildInput({ prompt, imageDataUrls }) {
+            return { prompt, image_urls: imageDataUrls };
+          },
+        }),
+
+        new FalModelProvider({
+          id: "fal-ai/flux-2/turbo",
+          label: "flux-2/turbo",
+          endpoint: "fal-ai/flux-2/turbo",
+          capabilities: { imageToImage: false },
+          options: [
+            { key: "image_size", label: "Image size", type: "select", default: "landscape_16_9", choices: fluxSizeChoices },
+            { key: "num_images", label: "Number", type: "number", default: 1, min: 1, max: 4 },
+            {
+              key: "output_format",
+              label: "Format",
+              type: "select",
+              default: "png",
+              choices: [
+                { value: "png", label: "png" },
+                { value: "jpeg", label: "jpeg" },
+              ],
+            },
+          ],
+          buildInput({ prompt, options }) {
+            return {
+              prompt,
+              image_size: options.image_size,
+              num_images: options.num_images || 1,
+              output_format: options.output_format || "png",
+            };
+          },
+        }),
+
+        new FalModelProvider({
+          id: "fal-ai/flux-2/turbo/edit",
+          label: "flux-2/turbo/edit",
+          endpoint: "fal-ai/flux-2/turbo/edit",
+          capabilities: { imageToImage: true },
+          options: [
+            { key: "guidance_scale", label: "Guidance", type: "number", default: 2.5, min: 0, max: 20, step: 0.1 },
+            { key: "image_size", label: "Image size", type: "select", default: "square", choices: fluxSizeChoices },
+            { key: "num_images", label: "Number", type: "number", default: 1, min: 1, max: 4 },
+            {
+              key: "output_format",
+              label: "Format",
+              type: "select",
+              default: "png",
+              choices: [
+                { value: "png", label: "png" },
+                { value: "jpeg", label: "jpeg" },
+              ],
+            },
+          ],
+          buildInput({ prompt, imageDataUrls, options }) {
+            return {
+              prompt,
+              image_urls: imageDataUrls,
+              guidance_scale: options.guidance_scale ?? 2.5,
+              image_size: options.image_size || "square",
+              num_images: options.num_images || 1,
+              output_format: options.output_format || "png",
+              enable_safety_checker: false,
+              safety_tolerance: "6",
+            };
+          },
+        }),
+      ];
+
+      class FalImageLab {
+        static DB_NAME = "fal-image-lab-reference-ui";
+        static STORE_NAME = "keyval";
+
+        constructor() {
+          this.messages = [];
+          this.outputs = [];
+          this.nextId = 1;
+          this.nextOutputId = 1;
+          this.selectedModelId = MODELS[0].id;
+          this.optionState = {};
+          this.elapsedTimer = null;
+
+          this.store = createStore(FalImageLab.DB_NAME, FalImageLab.STORE_NAME);
+
+          this.sortable = new SortableManager({
+            itemSelector: ".message-item",
+            handleSelector: ".drag-handle",
+            onReorder: (fromId, toId, isTop) => this.handleReorder(fromId, toId, isTop),
+            onReorderComplete: () => {
+              this.renderMessages();
+              this.saveMessages();
+            },
+          });
+
+          this.elements = {
+            apiKeyInput: document.getElementById("api-key"),
+            messagesContainer: document.getElementById("messages-container"),
+            addItemButton: document.getElementById("add-item-button"),
+            deleteAllButton: document.getElementById("delete-all-button"),
+            outputContainer: document.getElementById("output-container"),
+            modelSelect: document.getElementById("model-select"),
+            modelOptions: document.getElementById("model-options"),
+            generateButton: document.getElementById("generate-button"),
+            deleteAllOutputsButton: document.getElementById("delete-all-outputs-button"),
+          };
+        }
+
+        get model() {
+          return MODELS.find((m) => m.id === this.selectedModelId) || MODELS[0];
+        }
+
+        async init() {
+          for (const model of MODELS) {
+            const option = document.createElement("option");
+            option.value = model.id;
+            option.textContent = model.label;
+            this.elements.modelSelect.appendChild(option);
+          }
+
+          await this.loadState();
+          this.bindEvents();
+          this.renderModelControls();
+          this.renderMessages();
+          this.renderOutputs();
+        }
+
+        async loadState() {
+          this.elements.apiKeyInput.value = (await get("apiKey", this.store)) || "";
+
+          this.selectedModelId = (await get("selectedModelId", this.store)) || MODELS[0].id;
+          this.elements.modelSelect.value = this.selectedModelId;
+
+          this.optionState = (await get("optionState", this.store)) || {};
+
+          if (
+            this.optionState["fal-ai/gpt-image-2"]?.image_size &&
+            !gptImage2SizeChoices.some((c) => c.value === this.optionState["fal-ai/gpt-image-2"].image_size)
+          ) {
+            this.optionState["fal-ai/gpt-image-2"].image_size = "auto";
+            await set("optionState", this.optionState, this.store);
+          }
+
+          const messages = await get("messages", this.store);
+          if (Array.isArray(messages)) {
+            this.messages = messages;
+            const maxId = Math.max(...this.messages.map((m) => parseInt(m.id, 10)).filter(Number.isFinite), 0);
+            this.nextId = maxId + 1;
+          }
+
+          const outputs = await get("outputs", this.store);
+          if (Array.isArray(outputs)) {
+            this.outputs = outputs.filter((o) => !o.loading);
+            const maxOutputId = Math.max(...this.outputs.map((o) => parseInt(o.id, 10)).filter(Number.isFinite), 0);
+            this.nextOutputId = maxOutputId + 1;
+          }
+        }
+
+        bindEvents() {
+          this.elements.apiKeyInput.addEventListener("input", (e) => set("apiKey", e.target.value.trim(), this.store));
+
+          this.elements.addItemButton.addEventListener("click", () => this.addItem());
+          this.elements.deleteAllButton.addEventListener("click", () => this.deleteAllMessages());
+          this.elements.generateButton.addEventListener("click", () => this.handleGenerate());
+          this.elements.deleteAllOutputsButton.addEventListener("click", () => this.deleteAllOutputs());
+
+          this.elements.modelSelect.addEventListener("change", async () => {
+            this.saveCurrentOptions();
+            this.selectedModelId = this.elements.modelSelect.value;
+            await set("selectedModelId", this.selectedModelId, this.store);
+            this.renderModelControls();
+          });
+        }
+
+        renderModelControls() {
+          const state = this.optionState[this.model.id] || {};
+          this.model.renderOptionControls(this.elements.modelOptions, state, () => {
+            this.saveCurrentOptions();
+          });
+        }
+
+        saveCurrentOptions() {
+          this.optionState[this.model.id] = this.model.readOptions(this.elements.modelOptions);
+          set("optionState", this.optionState, this.store);
+        }
+
+        addItem() {
+          this.messages.push({ id: String(this.nextId++), text: "", image: null });
+          this.renderMessages();
+          this.saveMessages();
+        }
+
+        deleteMessage(id) {
+          this.messages = this.messages.filter((msg) => msg.id !== id);
+          this.renderMessages();
+          this.saveMessages();
+        }
+
+        deleteAllMessages() {
+          this.messages = [];
+          this.renderMessages();
+          this.saveMessages();
+        }
+
+        updateMessageText(id, text) {
+          const message = this.messages.find((msg) => msg.id === id);
+          if (!message) return;
+          message.text = text;
+          this.saveMessages();
+        }
+
+        async updateMessageImage(id, file) {
+          if (!file || !file.type.startsWith("image/")) return;
+
+          const message = this.messages.find((msg) => msg.id === id);
+          if (!message) return;
+
+          message.image = {
+            name: file.name || "pasted-image",
+            mimeType: file.type,
+            size: file.size,
+            dataUrl: await FalImageLab.fileToDataUrl(file),
+          };
+
+          this.renderMessages();
+          this.saveMessages();
+        }
+
+        renderMessages() {
+          this.elements.messagesContainer.innerHTML = "";
+          this.messages.forEach((message) => {
+            this.elements.messagesContainer.appendChild(this.createMessageElement(message));
+          });
+        }
+
+        createMessageElement(message) {
+          const item = document.createElement("div");
+          item.className = "message-item";
+          if (message.image) item.classList.add("has-image");
+          item.dataset.id = message.id;
+          item.draggable = false;
+
+          const dragHandle = document.createElement("div");
+          dragHandle.className = "drag-handle";
+          dragHandle.title = "drag-handle";
+          dragHandle.innerHTML = "⋮";
+          item.appendChild(dragHandle);
+
+          const thumbnail = document.createElement("img");
+          thumbnail.className = "message-thumbnail";
+          thumbnail.title = "image";
+          if (message.image) {
+            thumbnail.src = message.image.dataUrl;
+            thumbnail.alt = message.image.name || "Image";
+          }
+          item.appendChild(thumbnail);
+
+          const textarea = document.createElement("textarea");
+          textarea.className = "message-textarea";
+          textarea.title = "message-text";
+          textarea.value = message.text;
+          textarea.placeholder = "Enter text or paste an image...";
+          textarea.addEventListener("input", (e) => this.updateMessageText(message.id, e.target.value));
+
+          textarea.addEventListener("paste", async (e) => {
+            const items = Array.from(e.clipboardData?.items || []);
+            const imageItem = items.find((item) => item.type.startsWith("image/"));
+            if (!imageItem) return;
+
+            e.preventDefault();
+            const file = imageItem.getAsFile();
+            await this.updateMessageImage(message.id, file);
+          });
+
+          item.appendChild(textarea);
+
+          const buttonsContainer = document.createElement("div");
+          buttonsContainer.className = "message-buttons";
+
+          const deleteButton = document.createElement("button");
+          deleteButton.className = "message-button";
+          deleteButton.innerHTML = "🗑️";
+          deleteButton.title = "delete-message";
+          deleteButton.addEventListener("click", () => this.deleteMessage(message.id));
+          buttonsContainer.appendChild(deleteButton);
+
+          const uploadButton = document.createElement("button");
+          uploadButton.className = "message-button";
+          uploadButton.innerHTML = "📷";
+          uploadButton.title = "upload-image";
+          uploadButton.addEventListener("click", () => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "image/*";
+            input.title = "image-file";
+            input.className = "hidden-file-input";
+            input.addEventListener("change", async (e) => {
+              const file = e.target.files?.[0];
+              if (file) await this.updateMessageImage(message.id, file);
+              input.remove();
+            });
+            document.body.appendChild(input);
+            input.click();
+          });
+          buttonsContainer.appendChild(uploadButton);
+
+          if (message.image) {
+            const removeImageButton = document.createElement("button");
+            removeImageButton.className = "message-button";
+            removeImageButton.innerHTML = "❌";
+            removeImageButton.title = "remove-image";
+            removeImageButton.addEventListener("click", () => {
+              const msg = this.messages.find((m) => m.id === message.id);
+              if (msg) msg.image = null;
+              this.renderMessages();
+              this.saveMessages();
+            });
+            buttonsContainer.appendChild(removeImageButton);
+          }
+
+          item.appendChild(buttonsContainer);
+          this.sortable.attach(item, message.id);
+
+          return item;
+        }
+
+        handleReorder(fromId, targetId, isTop) {
+          const draggedIndex = this.messages.findIndex((msg) => msg.id === fromId);
+          const targetIndex = this.messages.findIndex((msg) => msg.id === targetId);
+          if (draggedIndex === -1 || targetIndex === -1) return;
+
+          const [draggedMessage] = this.messages.splice(draggedIndex, 1);
+
+          let insertIndex;
+          if (draggedIndex < targetIndex) insertIndex = isTop ? targetIndex - 1 : targetIndex;
+          else insertIndex = isTop ? targetIndex : targetIndex + 1;
+
+          this.messages.splice(insertIndex, 0, draggedMessage);
+        }
+
+        async saveMessages() {
+          await set("messages", this.messages, this.store);
+        }
+
+        buildOutputRequest({ modelId, parameters }) {
+          const { prompt, imageDataUrls } = this.model.buildMessagesInput(this.messages);
+          const input = {
+            ...this.model.buildInput({ prompt, imageDataUrls, options: parameters }),
+            sync_mode: true,
+          };
+
+          return {
+            modelId,
+            endpoint: this.model.endpoint,
+            input,
+          };
+        }
+
+        addOutput({ modelId, parameters }) {
+          const id = String(this.nextOutputId++);
+          const request = this.buildOutputRequest({ modelId, parameters });
+          const prompt = request.input.prompt || "";
+
+          this.outputs.unshift({
+            id,
+            images: [],
+            prompt,
+            resultText: "",
+            loading: true,
+            error: false,
+            raw: null,
+            input: request.input,
+            request,
+            modelId,
+            parameters,
+            startedAt: Date.now(),
+            completedAt: null,
+            elapsedMs: null,
+          });
+
+          this.renderOutputs();
+          this.startElapsedTimer();
+          return id;
+        }
+
+        updateRunningOutputs() {
+          const now = Date.now();
+
+          for (const output of this.outputs) {
+            if (!output.loading || !output.startedAt) continue;
+            output.elapsedMs = now - output.startedAt;
+            const status = document.querySelector(`[data-output-id="${output.id}"] .output-status`);
+            const prompt = document.querySelector(`[data-output-id="${output.id}"] .output-prompt`);
+            if (status) status.textContent = `Elapsed: ${FalImageLab.formatElapsed(output.elapsedMs, output.startedAt, output.completedAt)}`;
+            if (prompt) prompt.textContent = output.prompt || "(no text prompt)";
+          }
+
+          if (!this.outputs.some((o) => o.loading)) this.stopElapsedTimer();
+        }
+
+        startElapsedTimer() {
+          if (this.elapsedTimer) return;
+          this.elapsedTimer = setInterval(() => this.updateRunningOutputs(), 100);
+        }
+
+        stopElapsedTimer() {
+          if (!this.elapsedTimer) return;
+          clearInterval(this.elapsedTimer);
+          this.elapsedTimer = null;
+        }
+
+        updateOutput(id, { images, resultText, raw, input, loading = false, error = false, completedAt = Date.now() }) {
+          const output = this.outputs.find((o) => o.id === id);
+          if (!output) return;
+
+          output.images = images?.length ? images : [];
+          output.resultText = resultText || "";
+          output.raw = raw ?? output.raw;
+          output.input = input ?? output.input;
+          output.loading = loading;
+          output.error = error;
+          output.completedAt = completedAt;
+          output.elapsedMs = output.startedAt ? completedAt - output.startedAt : null;
+
+          this.renderOutputs();
+          if (!this.outputs.some((o) => o.loading)) this.stopElapsedTimer();
+          this.saveOutputs();
+        }
+
+        deleteOutput(id) {
+          this.outputs = this.outputs.filter((o) => o.id !== id);
+          this.renderOutputs();
+          if (!this.outputs.some((o) => o.loading)) this.stopElapsedTimer();
+          this.saveOutputs();
+        }
+
+        deleteAllOutputs() {
+          this.outputs = [];
+          this.renderOutputs();
+          this.stopElapsedTimer();
+          this.saveOutputs();
+        }
+
+        renderOutputs() {
+          this.elements.outputContainer.innerHTML = "";
+
+          if (this.outputs.length === 0) {
+            this.elements.outputContainer.innerHTML = "<p>No outputs yet</p>";
+            return;
+          }
+
+          for (const output of this.outputs) {
+            this.elements.outputContainer.appendChild(this.createOutputElement(output));
+          }
+        }
+
+        createOutputElement(output) {
+          const item = document.createElement("div");
+          item.className = "output-item";
+          item.dataset.outputId = output.id;
+
+          const content = document.createElement("div");
+          content.className = "output-item-content";
+
+          const status = document.createElement("div");
+          status.className = "output-status";
+          status.title = "output-status";
+          status.textContent = `${output.loading ? "Elapsed" : output.error ? "Failed after" : "Completed in"}: ${FalImageLab.formatElapsed(output.elapsedMs, output.startedAt, output.completedAt)}`;
+          content.appendChild(status);
+
+          const prompt = document.createElement("div");
+          prompt.className = "output-prompt";
+          prompt.title = "output-prompt";
+          prompt.textContent = `${output.loading ? "" : `[${FalImageLab.formatElapsed(output.elapsedMs, output.startedAt, output.completedAt)}] `}${output.prompt || "(no text prompt)"}`;
+          content.appendChild(prompt);
+
+          for (const imageUrl of output.images || []) {
+            const image = document.createElement("img");
+            image.className = "output-item-image";
+            image.title = "generated-image";
+            image.src = imageUrl;
+            image.alt = "Generated Image";
+            content.appendChild(image);
+          }
+
+          if (output.resultText) {
+            const resultText = document.createElement("div");
+            resultText.className = "output-result-text";
+            resultText.title = "output-result-text";
+            resultText.textContent = output.resultText;
+            content.appendChild(resultText);
+          }
+
+          const details = document.createElement("details");
+          const summary = document.createElement("summary");
+          summary.textContent = "Request details";
+          const pre = document.createElement("pre");
+          const inputDetails = { ...(output.input || output.request?.input || {}) };
+          delete inputDetails.image_urls;
+          pre.textContent = JSON.stringify(
+            {
+              modelId: output.modelId || "unknown",
+              endpoint: output.request?.endpoint || MODELS.find((m) => m.id === output.modelId)?.endpoint || output.modelId || "unknown",
+              input: inputDetails,
+              parameters: output.parameters || {},
+              ...(output.error ? { error: output.raw } : {}),
+            },
+            null,
+            2,
+          );
+          details.append(summary, pre);
+          content.appendChild(details);
+
+          item.appendChild(content);
+
+          const buttonsContainer = document.createElement("div");
+          buttonsContainer.className = "output-item-buttons";
+
+          const deleteButton = document.createElement("button");
+          deleteButton.className = "message-button";
+          deleteButton.innerHTML = "🗑️";
+          deleteButton.title = "delete-output";
+          deleteButton.addEventListener("click", () => this.deleteOutput(output.id));
+          buttonsContainer.appendChild(deleteButton);
+
+          item.appendChild(buttonsContainer);
+          return item;
+        }
+
+        async saveOutputs() {
+          await set(
+            "outputs",
+            this.outputs.filter((output) => !output.loading),
+            this.store,
+          );
+        }
+
+        async handleGenerate() {
+          const apiKey = this.elements.apiKeyInput.value.trim();
+          if (!apiKey) return alert("Please provide an API Key.");
+
+          const hasText = this.messages.some((m) => m.text.trim());
+          const hasImage = this.messages.some((m) => m.image);
+
+          if (!hasText && !hasImage) return alert("Please provide at least one message item.");
+          if (this.model.capabilities.imageToImage && !hasImage) return alert("This model requires at least one input image.");
+
+          this.saveCurrentOptions();
+
+          const parameters = this.optionState[this.model.id] || {};
+          const outputId = this.addOutput({
+            modelId: this.model.id,
+            parameters,
+          });
+
+          try {
+            const client = new FalRestClient(apiKey);
+            const result = await this.model.generate({
+              client,
+              messages: this.messages,
+              options: parameters,
+            });
+
+            this.updateOutput(outputId, {
+              images: result.images,
+              resultText: result.images.length ? result.text || "" : "Generation complete, but no image was returned.",
+              raw: result.raw,
+              input: result.input,
+              error: false,
+            });
+          } catch (error) {
+            this.updateOutput(outputId, {
+              images: [],
+              resultText: `Error: ${error.message || String(error)}`,
+              raw: error.raw || { message: error.message || String(error) },
+              input: this.outputs.find((o) => o.id === outputId)?.input || {
+                modelId: this.model.id,
+                parameters,
+              },
+              error: true,
+            });
+          }
+        }
+
+        static formatElapsed(elapsedMs, startedAt, completedAt) {
+          if (elapsedMs == null && startedAt && !completedAt) elapsedMs = Date.now() - startedAt;
+          if (elapsedMs == null) return "unknown";
+          if (elapsedMs < 1000) return `${elapsedMs}ms`;
+          return `${(elapsedMs / 1000).toFixed(1)}s`;
+        }
+
+        static fileToDataUrl(file) {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(file);
+          });
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        new FalImageLab().init();
+      });
+    </script>
+  </body>
+</html>
