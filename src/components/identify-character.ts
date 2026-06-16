@@ -4,8 +4,9 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { AIConnection } from "./ai-connection";
 
 const characterSchema = z.object({
-  character: z.string().describe("The Chinese/Kanji/Hiragana/Katakana/Korean characters identified."),
-  meaning: z.string().describe("One word English definition."),
+  character: z.string().describe("The idenitfied texts/characters/writing/symbol."),
+  meaning: z.string().describe("English definition. One word"),
+  concept: z.string().describe("English definition. One sentence max."),
 });
 
 export type IdentifiedCharacter = z.infer<typeof characterSchema>;
@@ -50,11 +51,12 @@ export async function identifyCharacter(aiConnection: AIConnection, imageData: s
           },
         },
         {
-          text: `Identify the Chinese/Kanji/Hiragana/Katakana/Korean calligraphy character in this image. 
+          text: `Identify the written text in this image. 
 Respond in this JSON format:
 {
- "character": "<the identified Chinese/Kanji/Hiragana/Katakana/Korean character(s)>",
- "meaning": "<One word English definition>"
+ "character": "<the identified character(s)/text/writing/symbol>",
+ "meaning": "<English definition. One word>",
+ "concept": "<English definition. One sentence max.>"
 }
 `,
         },
@@ -81,76 +83,4 @@ Respond in this JSON format:
   console.timeEnd("identifyCharacter");
 
   return result;
-}
-
-export async function identifyCharacterFast(aiConnection: AIConnection, imageData: string): Promise<string> {
-  const apiKey = aiConnection.getApiKey();
-  if (!apiKey) {
-    throw new Error("API key not found. Please connect to AI first.");
-  }
-
-  const ai = new GoogleGenAI({ apiKey });
-  const config: GenerateContentConfig = {
-    responseModalities: ["text"],
-    temperature: 0,
-  };
-  const model = "gemini-2.5-flash-image";
-
-  // Parse the image data (assuming it's a data URL like data:image/jpeg;base64,...)
-  let data: string;
-  let mimeType: string;
-  if (imageData.startsWith("data:")) {
-    const [mime, base64] = imageData.split(",");
-    mimeType = mime.split(":")[1].split(";")[0];
-    data = base64;
-  } else {
-    // Assume it's raw base64 data
-    data = imageData;
-    mimeType = "image/jpeg"; // Default assumption
-  }
-
-  const contents = [
-    {
-      role: "user",
-      parts: [
-        {
-          inlineData: {
-            data,
-            mimeType,
-          },
-        },
-        {
-          text: `Identify the Chinese/Kanji/Hiragana/Katakana/Korean character in the image.
-Respond in this format:
-"""
-Character: <Character,Kanji,Hiragana,Katakana,Korean>
-Definition: <Short English definition, Sentence case>
-"""
-Do not preamble or say anything else; just respond with the character and definition
-`.trim(),
-        },
-      ],
-    },
-  ];
-
-  console.time("identifyCharacterFast");
-  const response = await ai.models.generateContent({
-    model,
-    config,
-    contents,
-  });
-  console.timeEnd("identifyCharacterFast");
-
-  const responseText = response.text;
-  if (!responseText) {
-    throw new Error("No text returned from Gemini");
-  }
-
-  // Extract the definition from the response
-  const definitionMatch = responseText.match(/Definition:\s*(.*)/i);
-  if (definitionMatch) {
-    return definitionMatch[1].trim();
-  }
-
-  return responseText.trim();
 }

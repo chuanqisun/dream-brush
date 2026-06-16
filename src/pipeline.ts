@@ -1,21 +1,4 @@
-import {
-  catchError,
-  concatMap,
-  defaultIfEmpty,
-  EMPTY,
-  finalize,
-  from,
-  fromEvent,
-  ignoreElements,
-  map,
-  merge,
-  mergeMap,
-  of,
-  Subject,
-  take,
-  tap,
-  zip,
-} from "rxjs";
+import { catchError, concatMap, defaultIfEmpty, EMPTY, finalize, from, fromEvent, map, mergeMap, of, Subject, take, tap, zip } from "rxjs";
 import { AIConnection } from "./components/ai-connection";
 import { CanvasSequenceExporter, type CanvasSequenceExporterStatus } from "./components/canvas-exporter";
 import { CanvasHistory } from "./components/canvas-history";
@@ -26,7 +9,7 @@ import { DrawingCanvas } from "./components/draw-canvas";
 import { editPainting, generatePainting } from "./components/generate-painting";
 import { GenerativeCanvas } from "./components/generative-canvas";
 import { startIdeaGeneration } from "./components/idea-generator";
-import { identifyCharacter, identifyCharacterFast } from "./components/identify-character";
+import { identifyCharacter } from "./components/identify-character";
 import { InputCalibrationController } from "./components/input-calibration";
 import { PipelineMenuController } from "./components/pipeline-menu";
 import { designSound } from "./components/sound-design";
@@ -178,19 +161,15 @@ export async function main() {
           drawCanvas.clear();
           charCanvas.startDrying(boundingBox);
         });
-        const fast$ = from(identifyCharacterFast(connection, dataUrl)).pipe(
-          tap((result) => console.log("Fast OCR", result)),
-          map((meaning) => ({ identifiedMeaning: meaning, box: boundingBox, charCanvas })),
-        );
-        const slow$ = from(identifyCharacter(connection, dataUrl)).pipe(
+        const identify$ = from(identifyCharacter(connection, dataUrl)).pipe(
           tap((result) => {
-            console.log("Slow OCR", `${result.character} ${result.meaning}`);
+            console.log("Slow OCR", `${result.character} ${result.meaning} ${result.concept}`);
             recognizedConcepts$.next(result);
             history.add(result);
           }),
-          ignoreElements(),
+          map((result) => ({ identifiedMeaning: result.concept, box: boundingBox, charCanvas })),
         );
-        return merge(fast$, slow$);
+        return identify$;
       }),
       concatMap((result) => {
         const isEmpty = generativeCanvas.isCanvasEmpty();
