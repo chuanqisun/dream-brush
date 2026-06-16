@@ -6,7 +6,7 @@ import { AIConnection } from "./ai-connection";
 const characterSchema = z.object({
   character: z.string().describe("The idenitfied texts/characters/writing/symbol."),
   meaning: z.string().describe("English definition. One word"),
-  concept: z.string().describe("English definition. One sentence max."),
+  concept: z.string().describe("English definition. One sentence max"),
 });
 
 export type IdentifiedCharacter = z.infer<typeof characterSchema>;
@@ -56,7 +56,7 @@ Respond in this JSON format:
 {
  "character": "<the identified character(s)/text/writing/symbol>",
  "meaning": "<English definition. One word>",
- "concept": "<English definition. One sentence max.>"
+ "concept": "<English definition. One sentence max>"
 }
 `,
         },
