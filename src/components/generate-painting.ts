@@ -12,7 +12,7 @@ export async function generatePainting(aiConnection: AIConnection, description: 
     responseModalities: ["IMAGE"],
     temperature: 0.5,
   };
-  const model = "gemini-2.5-flash-image";
+  const model = "gemini-3.1-flash-image";
 
   const response = await ai.models.generateContent({
     model,
@@ -47,7 +47,7 @@ export async function editPainting(aiConnection: AIConnection, imageData: string
     responseModalities: ["IMAGE"],
     temperature: 0.5,
   };
-  const model = "gemini-2.5-flash-image";
+  const model = "gemini-3.1-flash-image";
 
   // Parse the image data (assuming it's a data URL like data:image/jpeg;base64,...)
   let data: string;
