@@ -10,7 +10,6 @@ export async function generatePainting(aiConnection: AIConnection, description: 
   const ai = new GoogleGenAI({ apiKey });
   const config: GenerateContentConfig = {
     responseModalities: ["IMAGE"],
-    temperature: 0.5,
   };
   const model = "gemini-3.1-flash-image";
 
@@ -45,7 +44,6 @@ export async function editPainting(aiConnection: AIConnection, imageData: string
   const ai = new GoogleGenAI({ apiKey });
   const config: GenerateContentConfig = {
     responseModalities: ["IMAGE"],
-    temperature: 0.5,
   };
   const model = "gemini-3.1-flash-image";
 
